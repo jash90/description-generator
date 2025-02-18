@@ -53,7 +53,7 @@ This application enables you to:
 
 3. **Configure Environment Variables**
 
-   Create a `.env.local` file at the project root and add:
+   Create a `.env` file at the project root and add:
    ```env
    PERPLEXITY_API_KEY=your-perplexity-api-key-here
    ```
