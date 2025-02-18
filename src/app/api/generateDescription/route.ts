@@ -6,6 +6,7 @@ const perplexityInstance = new OpenAI({
   // Make sure to store your API key securely in an environment variable
   apiKey: process.env.PERPLEXITY_API_KEY,
   baseURL: 'https://api.perplexity.ai',
+  dangerouslyAllowBrowser: true,
 });
 
 export const maxDuration = 60; // This function can run for a maximum of 20 seconds
