@@ -9,10 +9,10 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<Array<{ id?: number; ean: string; description: string; createdAt?: string }>>([]);
+  // const [history, setHistory] = useState<Array<{ id?: number; ean: string; description: string; createdAt?: string }>>([]);
   const [copied, setCopied] = useState(false);
   // New state to track which history items are expanded (by index)
-  const [expandedHistory, setExpandedHistory] = useState<number[]>([]);
+  // const [expandedHistory, setExpandedHistory] = useState<number[]>([]);
 
   // Validate that the EAN code is either 8 or 13 digits
   const isValidEAN = (code: string) => {
@@ -157,7 +157,7 @@ export default function Home() {
           </div>
         )}
 
-        {history.length > 0 && (
+        {/*     {history.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Recent Searches</h3>
             <ul className="space-y-2">
@@ -189,7 +189,7 @@ export default function Home() {
               ))}
             </ul>
           </div>
-        )}
+        )} */}
       </main>
 
       <footer className="mt-8 text-center">
