@@ -20,23 +20,23 @@ export default function Home() {
   };
 
   // Helper function to fetch search history from the database
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch("/api/searchHistory");
-      if (res.ok) {
-        const historyData = await res.json();
-        setHistory(historyData);
-      } else {
-        console.error("Failed to fetch history");
-      }
-    } catch (error) {
-      console.error("Error fetching history:", error);
-    }
-  };
+  // const fetchHistory = async () => {
+  //   try {
+  //     const res = await fetch("/api/searchHistory");
+  //     if (res.ok) {
+  //       const historyData = await res.json();
+  //       setHistory(historyData);
+  //     } else {
+  //       console.error("Failed to fetch history");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching history:", error);
+  //   }
+  // };
 
   // Fetch history on initial mount
   useEffect(() => {
-    fetchHistory();
+    // fetchHistory();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,7 +70,7 @@ export default function Home() {
       setResult(description);
 
       // Fetch updated search history from the database after saving
-      await fetchHistory();
+      // await fetchHistory();
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes("429")) {
         setError("Rate limit exceeded. Please try again later.");
