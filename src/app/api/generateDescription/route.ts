@@ -35,10 +35,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(response, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error({ error });
     const errorMessage =
-      error.response && error.response.status === 429
+      error instanceof Error && error.message.includes("429")
         ? "Rate limit exceeded. Please try again later."
         : "Failed to generate product description. Please try again.";
     return NextResponse.json({ error: errorMessage }, { status: 500 });

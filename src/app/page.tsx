@@ -71,9 +71,8 @@ export default function Home() {
 
       // Fetch updated search history from the database after saving
       await fetchHistory();
-    } catch (err: any) {
-      console.error(err);
-      if (err.message.includes("429")) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes("429")) {
         setError("Rate limit exceeded. Please try again later.");
       } else {
         setError("Failed to generate product description. Please try again.");

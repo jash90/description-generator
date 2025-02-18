@@ -8,7 +8,7 @@ export async function GET() {
             take: 5,
         });
         return NextResponse.json(searches, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error fetching search history:", error);
         return NextResponse.json({ error: "Failed to fetch search history" }, { status: 500 });
     }
