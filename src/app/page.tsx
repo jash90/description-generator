@@ -175,7 +175,28 @@ export default function Home() {
           </div>
         )}
 
-        {history.length > 0 && (
+        {/* New form to search history by EAN */}
+        <form onSubmit={handleHistorySearch} className="mb-4 flex flex-col gap-4">
+          <label htmlFor="search-ean" className="text-lg font-medium">
+            Search by EAN:
+          </label>
+          <input
+            id="search-ean"
+            type="text"
+            value={searchEan}
+            onChange={(e) => setSearchEan(e.target.value)}
+            placeholder="e.g., 12345678"
+            className="p-3 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
+          >
+            Search
+          </button>
+        </form>
+
+         {history.length > 0 && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Recent Searches</h3>
             <ul className="space-y-2">
@@ -208,27 +229,6 @@ export default function Home() {
             </ul>
           </div>
         )}
-
-        {/* New form to search history by EAN */}
-        <form onSubmit={handleHistorySearch} className="mb-4 flex flex-col gap-4">
-          <label htmlFor="search-ean" className="text-lg font-medium">
-            Search by EAN:
-          </label>
-          <input
-            id="search-ean"
-            type="text"
-            value={searchEan}
-            onChange={(e) => setSearchEan(e.target.value)}
-            placeholder="e.g., 12345678"
-            className="p-3 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
-          >
-            Search
-          </button>
-        </form>
       </main>
 
       <footer className="mt-8 text-center">
