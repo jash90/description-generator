@@ -13,6 +13,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   // New state to track which history items are expanded (by index)
   const [expandedHistory, setExpandedHistory] = useState<number[]>([]);
+  const [searchEan, setSearchEan] = useState("");
 
   // Validate that the EAN code is either 8 or 13 digits
   const isValidEAN = (code: string) => {
@@ -25,7 +26,8 @@ export default function Home() {
       const res = await fetch("/api/searchHistory");
       if (res.ok) {
         const historyData = await res.json();
-        setHistory(historyData);
+        const limitedHistory = historyData.slice(-5);
+        setHistory(limitedHistory);
       } else {
         console.error("Failed to fetch history");
       }
@@ -89,6 +91,22 @@ export default function Home() {
       setTimeout(() => setCopied(false), 2000);
     } catch (copyError) {
       console.error("Failed to copy text:", copyError);
+    }
+  };
+
+  const handleHistorySearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/searchHistory?ean=${searchEan}`);
+      if (res.ok) {
+        const historyData = await res.json();
+        const limitedHistory = historyData.slice(-5);
+        setHistory(limitedHistory);
+      } else {
+        console.error("Failed to fetch history by EAN");
+      }
+    } catch (error) {
+      console.error("Error searching history by EAN:", error);
     }
   };
 
@@ -190,6 +208,27 @@ export default function Home() {
             </ul>
           </div>
         )}
+
+        {/* New form to search history by EAN */}
+        <form onSubmit={handleHistorySearch} className="mb-4 flex flex-col gap-4">
+          <label htmlFor="search-ean" className="text-lg font-medium">
+            Search by EAN:
+          </label>
+          <input
+            id="search-ean"
+            type="text"
+            value={searchEan}
+            onChange={(e) => setSearchEan(e.target.value)}
+            placeholder="e.g., 12345678"
+            className="p-3 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
+          >
+            Search
+          </button>
+        </form>
       </main>
 
       <footer className="mt-8 text-center">
