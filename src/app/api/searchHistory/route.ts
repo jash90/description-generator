@@ -2,63 +2,82 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { NextRequest } from 'next/server';
 
-// Simple in-memory cache
-// For production, consider Redis or another persistent store.
-const eanCache: Record<
-    string,
-    { data: any[]; expiration: number }
-> = {};
-
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour cache time
 const LATEST_HISTORY_KEY = "latestHistory";
 
-function isCacheValid(cacheEntry: { data: any[]; expiration: number }): boolean {
-    return cacheEntry && cacheEntry.expiration > Date.now();
+// Helper function to determine if a cache entry is valid
+function isCacheValid(expiration: Date): boolean {
+    return expiration.getTime() > Date.now();
 }
 
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const ean = searchParams.get("ean");
+        const rawEan = searchParams.get("ean");
+        const ean = rawEan?.trim() || null;
 
-        // If ean is provided, use it as a cache key
-        if (ean && ean.trim()) {
-            const cacheKey = `ean:${ean.trim()}`;
+        // If an ean was provided:
+        if (ean) {
+            // Try retrieving from the EanCache table by ean
+            const existingCache = await prisma.eanCache.findUnique({
+                where: { ean },
+            });
 
-            // Check if we have a valid cache hit
-            if (eanCache[cacheKey] && isCacheValid(eanCache[cacheKey])) {
-                return NextResponse.json(eanCache[cacheKey].data, { status: 200 });
+            if (existingCache && isCacheValid(existingCache.expiration)) {
+                // Return the cached data if it hasn't expired
+                return NextResponse.json(existingCache.data, { status: 200 });
             }
 
-            // Otherwise, fetch from DB
+            // Otherwise, fetch fresh data from the 'search' table
             const searches = await prisma.search.findMany({
-                where: { ean: ean.trim() },
+                where: { ean },
                 orderBy: { createdAt: 'desc' },
             });
 
-            // Store to cache
-            eanCache[cacheKey] = {
-                data: searches,
-                expiration: Date.now() + CACHE_TTL_MS,
-            };
+            // Upsert the cache entry
+            await prisma.eanCache.upsert({
+                where: { ean },
+                update: {
+                    data: searches,
+                    expiration: new Date(Date.now() + CACHE_TTL_MS),
+                },
+                create: {
+                    ean,
+                    data: searches,
+                    expiration: new Date(Date.now() + CACHE_TTL_MS),
+                },
+            });
 
             return NextResponse.json(searches, { status: 200 });
         } else {
-            // No EAN provided: return the last 5 items (with caching)
-            if (eanCache[LATEST_HISTORY_KEY] && isCacheValid(eanCache[LATEST_HISTORY_KEY])) {
-                return NextResponse.json(eanCache[LATEST_HISTORY_KEY].data, { status: 200 });
+            // No EAN provided: check the "latestHistory" cache
+            const existingLatestCache = await prisma.eanCache.findUnique({
+                where: { ean: LATEST_HISTORY_KEY },
+            });
+
+            if (existingLatestCache && isCacheValid(existingLatestCache.expiration)) {
+                return NextResponse.json(existingLatestCache.data, { status: 200 });
             }
 
+            // If no valid cache, fetch the last 5 items
             const searches = await prisma.search.findMany({
                 orderBy: { createdAt: 'desc' },
                 take: 5,
             });
 
-            // Update cache
-            eanCache[LATEST_HISTORY_KEY] = {
-                data: searches,
-                expiration: Date.now() + CACHE_TTL_MS,
-            };
+            // Upsert the "latestHistory" record in the EanCache table
+            await prisma.eanCache.upsert({
+                where: { ean: LATEST_HISTORY_KEY },
+                update: {
+                    data: searches,
+                    expiration: new Date(Date.now() + CACHE_TTL_MS),
+                },
+                create: {
+                    ean: LATEST_HISTORY_KEY,
+                    data: searches,
+                    expiration: new Date(Date.now() + CACHE_TTL_MS),
+                },
+            });
 
             return NextResponse.json(searches, { status: 200 });
         }

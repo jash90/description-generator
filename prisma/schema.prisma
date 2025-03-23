@@ -12,4 +12,12 @@ model Search {
   ean         String
   description String
   createdAt   DateTime @default(now())
+}
+
+model EanCache {
+  ean        String  @id
+  data       Json
+  expiration DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 } 
